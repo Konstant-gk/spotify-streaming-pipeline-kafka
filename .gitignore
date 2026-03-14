@@ -1,2 +1,4 @@
 /Env._Passwords_Offline
 /docker
+src/consumers/.env
+src/producers/.env
