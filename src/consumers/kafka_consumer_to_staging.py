@@ -1,18 +1,20 @@
 import json
 import os
 from kafka import KafkaConsumer
-from datetime import datetime
+from datetime import datetime, timezone
 import boto3
 from dotenv import load_dotenv
+from pathlib import Path
 
-# ---------- Load environment variables ----------
-load_dotenv()
+# Load .env from script directory (works regardless of CWD)
+_env_path = Path(__file__).resolve().parent / ".env"
+load_dotenv(dotenv_path=_env_path)
 
 # ---------- Configuration ----------
 MINIO_BUCKET = os.getenv("MINIO_BUCKET", "spotify-data")
-MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "http://localhost:9102")
-MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY")
-MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY")
+MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "http://127.0.0.1:9002")
+MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "admin")
+MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "password123")
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "spotify-events")
 KAFKA_BOOTSTRAP_SERVER = os.getenv("KAFKA_BOOTSTRAP_SERVER", "localhost:29092")
 KAFKA_GROUP_ID = os.getenv("KAFKA_GROUP_ID", "kafka-to-minio-consumer")
@@ -38,13 +40,15 @@ except Exception:
 consumer = KafkaConsumer(
     KAFKA_TOPIC,
     bootstrap_servers=[KAFKA_BOOTSTRAP_SERVER],
+    api_version=(0, 10, 1),
     auto_offset_reset="earliest",
     enable_auto_commit=True,
     group_id=KAFKA_GROUP_ID,
     value_deserializer=lambda v: json.loads(v.decode("utf-8"))
 )
 
-print(f"🎧 Listening for events on Kafka topic '{KAFKA_TOPIC}'...")
+print(f"Listening for events on Kafka topic '{KAFKA_TOPIC}'... (batch size: {BATCH_SIZE})")
+print("Tip: Run the producer in another terminal: python src/producers/spotify_producers.py")
 
 batch = []
 
@@ -53,7 +57,7 @@ for message in consumer:
     batch.append(event)
 
     if len(batch) >= BATCH_SIZE:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         date_path = now.strftime("date=%Y-%m-%d/hour=%H")
         file_name = f"spotify_events_{now.strftime('%Y-%m-%dT%H-%M-%S')}.json"
         file_path = f"bronze/{date_path}/{file_name}"
@@ -66,5 +70,5 @@ for message in consumer:
             Body=json_data.encode("utf-8")
         )
 
-        print(f"✅ Uploaded {len(batch)} events to MinIO: {file_path}")
+        print(f"Uploaded {len(batch)} events to MinIO: {file_path}")
         batch = []
