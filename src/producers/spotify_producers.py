@@ -15,7 +15,7 @@ load_dotenv()
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:29092")
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "spotify-events")
 USER_COUNT = int(os.getenv("USER_COUNT", 20))
-EVENT_INTERVAL_SECONDS = int(os.getenv("EVENT_INTERVA_SECONDS", 1))
+EVENT_INTERVAL_SECONDS = int(os.getenv("EVENT_INTERVAL_SECONDS", 1))
 
 fake = Faker()
 
