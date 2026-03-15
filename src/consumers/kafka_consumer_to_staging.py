@@ -11,10 +11,10 @@ _env_path = Path(__file__).resolve().parent / ".env"
 load_dotenv(dotenv_path=_env_path)
 
 # ---------- Configuration ----------
-MINIO_BUCKET = os.getenv("MINIO_BUCKET", "spotify-data")
-MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "http://127.0.0.1:9002")
-MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "admin")
-MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "password123")
+MINIO_BUCKET = os.getenv("MINIO_BUCKET")
+MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT")
+MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY")
+MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY")
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "spotify-events")
 KAFKA_BOOTSTRAP_SERVER = os.getenv("KAFKA_BOOTSTRAP_SERVER", "localhost:29092")
 KAFKA_GROUP_ID = os.getenv("KAFKA_GROUP_ID", "kafka-to-minio-consumer")
